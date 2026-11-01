@@ -48,6 +48,20 @@ Add `--json` for machine-readable output. The exit code is 1 if it finds a defec
 - **Demo file:** 60 fps, 1200 frames, and PASS on all three checks.
 - **Camera fix:** on a spiral shot from the same film, with both versions at 60 fps, the frame-to-frame variation in motion fell from 36% to 7% after replacing camera noise with smooth curves.
 
+## Results on a slow stroke filter
+
+A second test, on a vertical woodcut film whose look comes from a slow stroke filter over a 3D render. Same film and same sections, before (30 fps, filter recut 12 times per second) and after (60 fps, blended recuts, smooth camera, 3-sample blur). Lower `jump` is better, and the limit is 0.1. [Watch the side-by-side clip](demo/woodcut-before-after.mp4) (10 s, silent, before on the left).
+
+| Section (2 s each) | Before | After |
+|---|---|---|
+| Portrait over moving water | jump 1.15 and 2.09, `jitter` FAIL | jump 0.01 and 0.11, `jitter` FAIL by a hair on 1 s |
+| Static icon | still for 1.14 s, `still` FAIL | no still stretch |
+| River, 3D with stroke filter | jump 2.39 and 2.54, `jitter` FAIL | jump 0.19 and 0.20, still `jitter` FAIL, about 13 times lower |
+| Slow scene, already fine | jump 0.01, PASS | jump 0.01, PASS |
+| Text card | still for 0.5 s, `still` FAIL | no still stretch, after adding drifting specks |
+
+Caveats: 5 short sections from one film, and the numbers don't prove how it feels to a viewer. The heaviest section still fails the meter, and each 2 s test took about 2 minutes to render, startup included.
+
 ## Limits
 
 - The thresholds come from a small test set of 5 videos, so treat them as a starting point.
@@ -57,4 +71,4 @@ Add `--json` for machine-readable output. The exit code is 1 if it finds a defec
 
 The skill and the script are under the [MIT license](LICENSE).
 
-The `demo/` folder is **not**. It holds an unofficial, non-commercial fan animation inspired by *Uzumaki* by Junji Ito, included only to demonstrate the technique. See [demo/NOTICE.md](demo/NOTICE.md).
+The `demo/` folder is **not**. It holds an unofficial, non-commercial fan animation inspired by *Uzumaki* by Junji Ito, included only to demonstrate the technique, and a clip from the author's own woodcut film (all rights reserved). See [demo/NOTICE.md](demo/NOTICE.md).

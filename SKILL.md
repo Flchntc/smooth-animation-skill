@@ -47,6 +47,16 @@ acc.globalAlpha = 1;                                   // captions go on afterwa
 ```
 A threshold, posterization or "print" step after the average erases the blur. Soften the threshold or average after that step. In your own shader: `smoothstep(.5 - w, .5 + w, m)` with `w` near .4 (the edge stays sharp, because only the averaged pixels land in the middle). `step()` or a small `w` erases the blur.
 
+**Filters too slow to run per sample** (a stroke tracer, a stylizer over a 3D render, anything taking seconds per image): don't quantize the look to its own rate, because every recut becomes a jump in the motion. Keep the filter at a low rate (12 per second worked), cache each result as a layer, and draw every frame as a blend of the two nearest results, with the camera moving on top of them:
+```js
+const f = t * CUT_FPS, i = Math.floor(f), a = f - i;                // CUT_FPS = 12
+const A = cut(key, i / CUT_FPS), B = cut(key, (i + 1) / CUT_FPS);    // cached layers, small LRU
+g.globalCompositeOperation = 'lighter';
+g.globalAlpha = 1 - a; g.drawImage(A, 0, 0);
+g.globalAlpha = a;     g.drawImage(B, 0, 0);
+```
+The blend costs about the same as drawing one layer, so the filter still runs only at its own rate. Expect a slightly softer, greyer image while a blend is halfway. Text-only cards also need something moving: a slow camera alone can still read as `still`, so add drifting specks or similar.
+
 **6. Fast elements.** Avoid the wagon-wheel effect:
 - Repeating patterns (spokes, fences): at most 40% of the spacing per frame. With 48 spokes the spacing is 7.5°, so up to 3° per frame, or 180°/s at 60 fps. Above that, slow it down and say so, or raise samples and shutter until it blends into a disc.
 - Streaks (rain): longer than the distance travelled per frame.
